@@ -1,0 +1,23 @@
+{
+  "name": "mobile-wright-framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mobilewright test",
+    "test:report": "mobilewright test --reporter html",
+    "report": "mobilewright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "mobilewright": "^0.0.53",
+    "test": "^3.3.0"
+  },
+  "devDependencies": {
+    "@mobilewright/test": "^0.0.53",
+    "typescript": "^7.0.2"
+  }
+}
