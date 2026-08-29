@@ -3,3 +3,4 @@ mobilewright-report/
 test-results/
 *.log
 apps/*.apk
+.claude/worktrees/
