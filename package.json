@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mobilewright test",
     "test:report": "mobilewright test --reporter html",
-    "report": "mobilewright show-report"
+    "report": "mobilewright show-report",
+    "inspect": "mobilewright inspect"
   },
   "keywords": [],
   "author": "",
