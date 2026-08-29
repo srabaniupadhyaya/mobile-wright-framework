@@ -49,6 +49,7 @@ test('user can sign up with a new random account', async ({ screen }) => {
 
   await screen.getByLabel('Create Account').tap();
 
-  // Signup succeeds and the Create Account screen is no longer shown.
-  await expect(screen.getByText('Create Account')).not.toBeVisible();
+  // Signup succeeds and navigates to the home screen.
+  await expect(screen.getByText('Expense Groups')).toBeVisible();
+  await expect(screen.getByLabel('Logout')).toBeVisible();
 });
