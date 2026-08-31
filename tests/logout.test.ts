@@ -1,13 +1,13 @@
 // Logout flow test for the Expense Manager app.
 // for documentation see: https://mobilewright.dev/docs/
 import { test, expect } from '@mobilewright/test';
-import { randomTestUser } from './helpers.js';
+import { ensureLoggedOut, randomTestUser } from './helpers.js';
 
 test('user can log out after signing up', async ({ screen }) => {
   const user = randomTestUser();
 
   // Sign up a fresh account to reach the home screen.
-  await expect(screen.getByText('Welcome Back')).toBeVisible();
+  await ensureLoggedOut(screen);
   await screen.getByLabel('Signup').tap();
   await expect(screen.getByText('Create Account')).toBeVisible();
 
