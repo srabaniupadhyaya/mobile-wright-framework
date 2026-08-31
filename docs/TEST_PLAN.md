@@ -26,6 +26,14 @@ know are:
     (Android's `content-desc`).
   - `screen.getByPlaceholder('John Doe')` — matches a text input by its
     placeholder/hint text.
+  - `screen.getByTestId('submit-button')` — matches an explicit test
+    ID/element ID the app exposes (Android `resource-id` /
+    React Native `testID`). **Prefer this over placeholder/label for form
+    fields and buttons when the app provides one** — it's the most robust
+    against copy changes and doesn't rely on any single rendered string.
+    The signup/login form inputs (`name-input`, `email-input`,
+    `password-input`, `submit-button`) all have these; the current tests
+    use `getByTestId` for them.
   - Locators are lazy — building one doesn't search the screen yet. Actions
     (`.tap()`, `.fill()`) and assertions do.
 - **Actions**: `.tap()`, `.fill(text)`, `.clear()`. These auto-wait for the
@@ -53,22 +61,25 @@ npm run report              #   screenshots/traces per test (open separately)
 
 **Test data isolation:** each test should create its own fresh
 account/data rather than depending on state left by another test or a
-previous run. `tests/helpers.ts` has `randomTestUser()` for this. Between
-full local runs, `adb shell pm clear com.navindalmia.expensemanager` wipes
-the app to a logged-out state — do this if a test fails and you suspect
-stale state (an old session, a leftover group) rather than a real bug.
+previous run. `tests/helpers.ts` has `randomTestUser()` for this, plus
+`ensureLoggedOut(screen)` — call this at the start of any test that
+assumes it begins on the Login screen, since the app persists auth state
+across launches and there's no automatic reset between tests otherwise.
+Between full local runs, `adb shell pm clear com.navindalmia.expensemanager`
+wipes the app entirely — use this if a test fails and you suspect stale
+state (e.g. a leftover group) that `ensureLoggedOut` alone won't fix.
 
 ---
 
 ## 2. App map (what's been verified so far)
 
 Confirmed by walking the app manually and via the existing tests
-(`tests/signup.test.ts`, `tests/logout.test.ts`, `tests/example.test.ts`):
+(`tests/signup.test.ts`, `tests/logout.test.ts`):
 
 | Screen | Key elements | Notes |
 |---|---|---|
-| **Login** | `email-input`, `password-input`, `submit-button` (label "Login"), "Signup" link | Heading text: "Expense Manager" / "Welcome Back" |
-| **Signup** | `name-input`, `email-input`, `password-input`, `submit-button` (label "Create Account"), "Login" link | Full name only accepts letters/spaces/hyphens/apostrophes — reject digits. Submit tap must happen after the keyboard is dismissed (see §4). |
+| **Login** | `getByTestId`: `email-input`, `password-input`, `submit-button`; `getByLabel('Signup')` link | Heading text: "Expense Manager" / "Welcome Back" |
+| **Signup** | `getByTestId`: `name-input`, `email-input`, `password-input`, `submit-button` (labeled "Create Account"); `getByLabel('Login')` link | Full name only accepts letters/spaces/hyphens/apostrophes — reject digits. Submit tap must happen after the keyboard is dismissed (see §4). |
 | **Home (Expense Groups)** | Heading "Expense Groups", "Logout" button, "+ New" button (label "Create new group"), group list or empty state ("No expense groups yet") | Reached after signup/login. |
 | **Create Group** | "Group Name" (required), "Description" (optional, 500 char limit), "Default Currency" (GBP/USD/EUR/INR/AUD/CAD/JPY/CNY, defaults to GBP), Cancel/Create buttons | Not yet covered by a test. |
 
@@ -91,8 +102,8 @@ before writing the next batch of tests — don't guess at element labels.
 ## 3. Proposed test coverage, in priority order
 
 ### P0 — Auth (mostly done)
-- [x] App launches to Login screen (`example.test.ts`)
-- [x] Sign up with a new random account (`signup.test.ts`)
+- [x] Sign up with a new random account (`signup.test.ts`) — also covers
+  app launch reaching the Login screen, via `ensureLoggedOut`
 - [x] Log out (`logout.test.ts`)
 - [ ] **Log in** with an existing account (sign up, log out, then log back in
   with the same credentials — verifies the account actually persisted
@@ -178,12 +189,17 @@ repeating the investigation:
    no activity, retry before assuming it's a real regression — but also
    don't wave away *every* timeout as this cause without checking.
 
-5. **The mobilewright↔emulator connection itself can drop mid-test**
-   (`WebSocket connection closed`), independent of anything the test or
-   app is doing. This looks identical to a real timeout in the output.
-   Retrying the same test immediately is the fastest way to tell infra
-   flake apart from a real bug — if it passes clean on retry with no code
-   change, it was infra.
+5. **`WebSocket connection closed` isn't always infra flake — check for a
+   navigation trigger first.** This looked identical to a random driver
+   disconnect for a while, but it turned out reproducible: tapping Logout
+   causes the app's navigation reset to briefly drop the mobilewright
+   driver's WebSocket connection to the device (the app itself lands on
+   the Login screen fine — it's purely the driver reconnecting). The fix
+   in `logout.test.ts` is a settle delay after the Logout tap plus a bumped
+   test timeout, not a retry. If you hit this error after a *different*
+   navigation/state transition, check whether it's reproducible in
+   isolation before assuming it's the same known cause or unrelated infra
+   flake — don't paper over it with a blind retry.
 
 6. **`nodenext` module resolution needs explicit `.js` extensions** on
    relative imports even in `.ts` files (e.g. `from './helpers.js'`, not
