@@ -105,9 +105,9 @@ before writing the next batch of tests — don't guess at element labels.
 - [x] Sign up with a new random account (`signup.test.ts`) — also covers
   app launch reaching the Login screen, via `ensureLoggedOut`
 - [x] Log out (`logout.test.ts`)
-- [ ] **Log in** with an existing account (sign up, log out, then log back in
-  with the same credentials — verifies the account actually persisted
-  server-side, not just the in-session state)
+- [x] **Log in** with an existing account (`login.test.ts`: sign up, log
+  out, then log back in with the same credentials — verifies the account
+  actually persisted server-side, not just the in-session state)
 - [ ] Login with wrong password shows an error and stays on Login
 - [ ] Signup with an already-registered email shows an error
 - [ ] Signup validation: empty fields, invalid email format, weak/short
