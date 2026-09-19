@@ -69,6 +69,20 @@ Between full local runs, `adb shell pm clear com.navindalmia.expensemanager`
 wipes the app entirely — use this if a test fails and you suspect stale
 state (e.g. a leftover group) that `ensureLoggedOut` alone won't fix.
 
+**Page objects:** each app screen has one class in `tests/pages/`
+(`LoginPage`, `SignupPage`, `HomePage`). A page class owns that screen's
+locators and its workarounds (dismissing the keyboard before submit, the
+settle delay after logout), and exposes intent-level methods such as
+`signup.signUp(user)` or `home.logOut()`. Tests call those methods and
+don't use `screen.getBy*` directly. A new screen gets a new page class.
+
+**If every test suddenly fails at its first assertion:** check the
+emulator's actual display before suspecting the tests. After a snapshot
+restore the app can be alive (`uiautomator` sees it) while the screen is
+black and the driver's `screen.viewTree()` shows only system UI. A plain
+restart didn't fix it; a cold boot (`emulator -avd Pixel_10_Pro_XL
+-no-snapshot-load`) did.
+
 ---
 
 ## 2. App map (what's been verified so far)

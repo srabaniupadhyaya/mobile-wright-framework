@@ -1,6 +1,7 @@
 // Shared test data helpers for the Expense Manager app tests.
-import { expect } from '@mobilewright/test';
 import type { Screen } from '@mobilewright/core';
+import { HomePage } from './pages/HomePage.js';
+import { LoginPage } from './pages/LoginPage.js';
 
 function randomString(chars: string, length: number): string {
   let result = '';
@@ -23,10 +24,11 @@ const ALPHANUMERIC = `${LETTERS}0123456789`;
  * regardless of what ran before them.
  */
 export async function ensureLoggedOut(screen: Screen) {
-  if (await screen.getByLabel('Logout').isVisible({ timeout: 2000 })) {
-    await screen.getByLabel('Logout').tap();
+  const home = new HomePage(screen);
+  if (await home.isLoggedIn()) {
+    await home.tapLogout();
   }
-  await expect(screen.getByText('Welcome Back')).toBeVisible();
+  await new LoginPage(screen).expectLoaded();
 }
 
 export function randomTestUser() {
