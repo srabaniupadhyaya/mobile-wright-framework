@@ -17,6 +17,14 @@ export class LoginPage {
     await this.screen.getByLabel('Signup').tap();
   }
 
+  async login(email: string, password: string) {
+    await this.screen.getByTestId('email-input').fill(email);
+    await this.screen.getByTestId('password-input').fill(password);
+    // Dismiss the keyboard before tapping submit, same as on signup.
+    await this.screen.getByText('Welcome Back').tap();
+    await this.screen.getByTestId('submit-button').tap();
+  }
+
   async expectSignupLinkVisible() {
     await expect(this.screen.getByLabel('Signup')).toBeVisible();
   }
