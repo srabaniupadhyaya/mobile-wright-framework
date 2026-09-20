@@ -101,8 +101,8 @@ Confirmed by walking the app manually and via the existing tests
 
 | Screen | Key elements | Notes |
 |---|---|---|
-| **Login** | `getByTestId`: `email-input`, `password-input`, `submit-button`; `getByLabel('Signup')` link | Heading text: "Expense Manager" / "Welcome Back" |
-| **Signup** | `getByTestId`: `name-input`, `email-input`, `password-input`, `submit-button` (labeled "Create Account"); `getByLabel('Login')` link | Full name only accepts letters/spaces/hyphens/apostrophes — reject digits. Submit tap must happen after the keyboard is dismissed (see §4). |
+| **Login** | `getByTestId`: `email-input`, `password-input`, `submit-button`; `getByLabel('Signup')` link | Heading text: "Expense Manager" / "Welcome Back". Wrong password shows inline text "Invalid email or password" and stays on Login. |
+| **Signup** | `getByTestId`: `name-input`, `email-input`, `password-input`, `submit-button` (labeled "Create Account"); `getByLabel('Login')` link | Full name only accepts letters/spaces/hyphens/apostrophes — reject digits. Submit tap must happen after the keyboard is dismissed (see §4). Duplicate email shows inline "Unable to create account. Please try another email." Field validation instead opens a native alert titled "Validation" with an "OK" button, reporting only the first failing field: "Email is required" (all empty), "Please enter a valid email", "Password must be at least 8 characters". The alert must be dismissed before the screen can be used again. All strings live in `tests/ui-strings.ts`. |
 | **Home (Expense Groups)** | Heading "Expense Groups", "Logout" button, "+ New" button (label "Create new group"), group list or empty state ("No expense groups yet") | Reached after signup/login. |
 | **Create Group** | "Group Name" (required), "Description" (optional, 500 char limit), "Default Currency" (GBP/USD/EUR/INR/AUD/CAD/JPY/CNY, defaults to GBP), Cancel/Create buttons | Not yet covered by a test. |
 
