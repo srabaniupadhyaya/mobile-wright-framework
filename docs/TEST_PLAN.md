@@ -62,9 +62,11 @@ npm run report              #   screenshots/traces per test (open separately)
 **Test data isolation:** each test should create its own fresh
 account/data rather than depending on state left by another test or a
 previous run. `tests/helpers.ts` has `randomTestUser()` for this, plus
-`ensureLoggedOut(screen)` — call this at the start of any test that
-assumes it begins on the Login screen, since the app persists auth state
-across launches and there's no automatic reset between tests otherwise.
+`ensureLoggedOut(screen)`, since the app persists auth state across
+launches and there's no automatic reset between tests otherwise. Both are
+wired into the fixtures (see below): the `user` fixture gives each test a
+fresh account, and the auto `startLoggedOut` fixture calls `ensureLoggedOut`
+before every test, so tests don't call either by hand.
 Between full local runs, `adb shell pm clear com.navindalmia.expensemanager`
 wipes the app entirely — use this if a test fails and you suspect stale
 state (e.g. a leftover group) that `ensureLoggedOut` alone won't fix.
@@ -75,6 +77,13 @@ locators and its workarounds (dismissing the keyboard before submit, the
 settle delay after logout), and exposes intent-level methods such as
 `signup.signUp(user)` or `home.logOut()`. Tests call those methods and
 don't use `screen.getBy*` directly. A new screen gets a new page class.
+
+**Fixtures:** `tests/fixtures.ts` extends `@mobilewright/test`'s `test`
+(a Playwright `TestType`, so `test.extend` works) with `loginPage`,
+`signupPage`, `homePage`, a fresh `user` per test, and an auto fixture
+`startLoggedOut` that runs `ensureLoggedOut` before every test. Tests import
+`test` from `./fixtures.js` and destructure what they need. A new page
+class gets a fixture entry there.
 
 **If every test suddenly fails at its first assertion:** check the
 emulator's actual display before suspecting the tests. After a snapshot
