@@ -10,15 +10,21 @@ export class HomePage {
   }
 
   async expectLoaded() {
-    await expect(this.screen.getByText('Expense Groups')).toBeVisible();
-    await expect(this.screen.getByLabel('Logout')).toBeVisible();
+    await expect(this.screen.getByTestId('home-screen')).toBeVisible();
+    await expect(this.screen.getByTestId('home-menu-button')).toBeVisible();
+  }
+
+  async expectNotLoaded() {
+    await expect(this.screen.getByTestId('home-menu-button')).not.toBeVisible();
   }
 
   async isLoggedIn() {
-    return this.screen.getByLabel('Logout').isVisible({ timeout: 2000 });
+    return this.screen.getByTestId('home-menu-button').isVisible({ timeout: 2000 });
   }
 
+  // Logout lives in the header's overflow menu (staging build), not on Home.
   async tapLogout() {
+    await this.screen.getByTestId('home-menu-button').tap();
     await this.screen.getByLabel('Logout').tap();
   }
 

@@ -27,9 +27,20 @@ export class SignupPage {
     // still up right after fill(), and a tap on the submit button while it's
     // showing gets consumed by Android to close the keyboard instead of
     // reaching the button underneath, leaving the form stuck. Tapping the
-    // (non-interactive) heading closes the keyboard harmlessly first.
+    // (non-interactive) heading closes the keyboard harmlessly first — this
+    // is a safe no-op if the keyboard is already closed, unlike the hardware
+    // Back button (tried and reverted: Back exits the screen entirely when
+    // there's nothing left to dismiss, and on this app one Back press from
+    // Signup ejects all the way to the Android launcher — a worse failure
+    // mode than the tap simply not registering).
     await this.screen.getByText('Create Account').first().tap();
     await this.screen.getByTestId('submit-button').tap();
+    // The submit tap can trigger a navigation (success → Home) or an
+    // inline/native error (validation, duplicate email) — either way it's a
+    // screen transition, and like Logout and the keyboard-dismiss above,
+    // that briefly drops the driver's WebSocket. Let it settle before the
+    // caller asserts on whatever comes next.
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   }
 
   async signUp(user: { name: string; email: string; password: string }) {

@@ -25,6 +25,10 @@ export class LoginPage {
     await this.screen.getByTestId('submit-button').tap();
   }
 
+  async expectError(text: string) {
+    await expect(this.screen.getByText(text)).toBeVisible();
+  }
+
   async expectSignupLinkVisible() {
     await expect(this.screen.getByLabel('Signup')).toBeVisible();
   }

@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 An automated UI test suite for the **Expense Manager** Android app
-(`com.navindalmia.expensemanager`), an Expo/EAS-built React Native app,
+(staging build, `com.navindalmia.expensemanager.staging`), an Expo/EAS-built React Native app,
 using [mobilewright](https://mobilewright.dev) — a Playwright-style
 framework for native mobile apps (locators, auto-waiting `expect`, test
 fixtures) instead of browsers. Tests drive a real Android emulator via

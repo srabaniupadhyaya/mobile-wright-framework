@@ -67,7 +67,7 @@ launches and there's no automatic reset between tests otherwise. Both are
 wired into the fixtures (see below): the `user` fixture gives each test a
 fresh account, and the auto `startLoggedOut` fixture calls `ensureLoggedOut`
 before every test, so tests don't call either by hand.
-Between full local runs, `adb shell pm clear com.navindalmia.expensemanager`
+Between full local runs, `adb shell pm clear com.navindalmia.expensemanager.staging`
 wipes the app entirely — use this if a test fails and you suspect stale
 state (e.g. a leftover group) that `ensureLoggedOut` alone won't fix.
 

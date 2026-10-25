@@ -13,6 +13,7 @@ type AppFixtures = {
   homePage: HomePage;
   user: ReturnType<typeof randomTestUser>;
   startLoggedOut: void;
+  screenshotAfterEach: void;
 };
 
 export const test = base.extend<AppFixtures>({
@@ -38,6 +39,22 @@ export const test = base.extend<AppFixtures>({
       await use();
     },
     { auto: true },
+  ],
+  // After every test, pass or fail, attach a screenshot of the final screen
+  // so a failed run shows what the app looked like. Best-effort: if the
+  // driver connection is already gone, that must not mask the real failure.
+  screenshotAfterEach: [
+    async ({ screen }, use, testInfo) => {
+      await use();
+      try {
+        const png = await screen.screenshot();
+        await testInfo.attach('final-screen', { body: png, contentType: 'image/png' });
+      } catch {
+        // Screenshot unavailable (driver disconnected); keep the test's own result.
+      }
+    },
+    // Own timeout, so the (slow) screenshot doesn't eat the test's budget.
+    { auto: true, timeout: 30_000 },
   ],
 });
 

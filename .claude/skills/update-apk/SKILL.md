@@ -48,7 +48,9 @@ Run from the repo root (`apps/demo-app.apk` is the target path).
    ```
    "$ANDROID_HOME/build-tools/<version>/aapt" dump badging apps/demo-app.apk.new | grep ^package
    ```
-   Expect `package: name='com.navindalmia.expensemanager'`. Stop and flag it
+   Expect `package: name='com.navindalmia.expensemanager.staging'` (the
+   staging build is the one the tests target; `bundleId` in
+   `mobilewright.config.ts` must match). Stop and flag it
    to the user if the package name doesn't match — wrong link was pasted.
 
 4. **Compare against the current APK before overwriting:**
