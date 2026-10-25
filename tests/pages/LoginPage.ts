@@ -17,9 +17,10 @@ export class LoginPage {
     await this.screen.getByLabel('Signup').tap();
   }
 
+  /** Empty strings leave that field untouched (for validation tests). */
   async login(email: string, password: string) {
-    await this.screen.getByTestId('email-input').fill(email);
-    await this.screen.getByTestId('password-input').fill(password);
+    if (email) await this.screen.getByTestId('email-input').fill(email);
+    if (password) await this.screen.getByTestId('password-input').fill(password);
     // Dismiss the keyboard before tapping submit, same as on signup.
     await this.screen.getByText('Welcome Back').tap();
     await this.screen.getByTestId('submit-button').tap();
@@ -27,6 +28,16 @@ export class LoginPage {
 
   async expectError(text: string) {
     await expect(this.screen.getByText(text)).toBeVisible();
+  }
+
+  /** Native "Validation" alert; it blocks the screen until dismissed. */
+  async expectValidationAlert(text: string) {
+    await expect(this.screen.getByText('Validation')).toBeVisible();
+    await expect(this.screen.getByText(text)).toBeVisible();
+  }
+
+  async dismissValidationAlert() {
+    await this.screen.getByText('OK').tap();
   }
 
   async expectSignupLinkVisible() {

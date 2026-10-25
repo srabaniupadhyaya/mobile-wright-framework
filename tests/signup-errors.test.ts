@@ -28,6 +28,22 @@ test('signup with an already-registered email shows an error', async ({
   await homePage.expectNotLoaded();
 });
 
+test('signup with digits in the name shows an inline error', async ({
+  loginPage,
+  signupPage,
+  homePage,
+  user,
+}, testInfo) => {
+  testInfo.setTimeout(60_000);
+
+  await loginPage.goToSignup();
+  await signupPage.expectLoaded();
+  await signupPage.signUp({ ...user, name: 'Test User 42' });
+
+  await signupPage.expectError(UI.signup.invalidNameError);
+  await homePage.expectNotLoaded();
+});
+
 // The app reports only the first failing field, in a native "Validation" alert.
 const validationCases: { title: string; fields: SignupFields; error: string }[] = [
   {

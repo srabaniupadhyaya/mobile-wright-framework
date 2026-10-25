@@ -10,8 +10,14 @@
 export const UI = {
   login: {
     wrongPasswordError: 'Invalid email or password',
+    // Native "Validation" alert; reports only the first failing field.
+    emptyFieldsError: 'Email is required',
+    missingPasswordError: 'Password is required',
   },
   signup: {
+    // Inline text on the form (no alert), shown once the name is the first
+    // failing field (password rules are checked before it).
+    invalidNameError: 'Name can only contain letters, spaces, hyphens, and apostrophes',
     duplicateEmailError: 'Unable to create account. Please try another email.',
     emptyFieldsError: 'Email is required',
     invalidEmailError: 'Please enter a valid email',

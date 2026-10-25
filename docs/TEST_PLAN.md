@@ -138,10 +138,17 @@ before writing the next batch of tests — don't guess at element labels.
 - [x] Signup validation: empty fields, invalid email format, short
   password (`signup-errors.test.ts`, one test per case) — asserts the
   native "Validation" alert text, then dismisses it with OK
-- [ ] Login with an unregistered email (expect the same "Invalid email or
-  password" — worth confirming the app doesn't reveal which emails exist)
-- [ ] Login with empty fields (behavior unknown — observe by hand first)
-- [ ] Signup name field rejects digits
+- [x] Login with an unregistered email shows the same "Invalid email or
+  password" as a wrong password, so the app doesn't reveal which emails
+  exist (`login-errors.test.ts`)
+- [x] Login validation: empty fields ("Email is required") and email with
+  no password ("Password is required"), both native "Validation" alerts
+  (`login-errors.test.ts`)
+- [x] Signup name with digits shows the inline "Name can only contain
+  letters, spaces, hyphens, and apostrophes" (`signup-errors.test.ts`)
+- [ ] Signup password rules beyond length: a special character is required
+  ("Password must contain special character (!@#$%^&*)"), found while
+  probing; other rules (uppercase, digit) not yet checked
 
 ### P1 — Group management
 - [ ] Create a group with just the required Group Name; verify it appears
