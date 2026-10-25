@@ -103,7 +103,7 @@ Confirmed by walking the app manually and via the existing tests
 |---|---|---|
 | **Login** | `getByTestId`: `email-input`, `password-input`, `submit-button`; `getByLabel('Signup')` link | Heading text: "Expense Manager" / "Welcome Back". Wrong password shows inline text "Invalid email or password" and stays on Login. |
 | **Signup** | `getByTestId`: `name-input`, `email-input`, `password-input`, `submit-button` (labeled "Create Account"); `getByLabel('Login')` link | Full name only accepts letters/spaces/hyphens/apostrophes — reject digits. Submit tap must happen after the keyboard is dismissed (see §4). Duplicate email shows inline "Unable to create account. Please try another email." Field validation instead opens a native alert titled "Validation" with an "OK" button, reporting only the first failing field: "Email is required" (all empty), "Please enter a valid email", "Password must be at least 8 characters". The alert must be dismissed before the screen can be used again. All strings live in `tests/ui-strings.ts`. |
-| **Home (Expense Groups)** | Heading "Expense Groups", "Logout" button, "+ New" button (label "Create new group"), group list or empty state ("No expense groups yet") | Reached after signup/login. |
+| **Home (Expense Groups)** | `getByTestId`: `home-screen`, `home-menu-button` (the ⋮ overflow menu, label "Menu"), `staging-banner`, `add-group-button` (label "Create new group"), `groups-flat-list`, `empty-state`, `create-group-button` (label "Create a new group"). Menu items: About, Themes, Labels, **Logout** | Reached after signup/login. **Staging build:** header reads "Expense Groups • STAGING" as one text element (so exact `getByText('Expense Groups')` no longer matches — use `home-screen`), and Logout is only reachable through the ⋮ menu. A STAGING banner ("test data only") sits under the header. |
 | **Create Group** | "Group Name" (required), "Description" (optional, 500 char limit), "Default Currency" (GBP/USD/EUR/INR/AUD/CAD/JPY/CNY, defaults to GBP), Cancel/Create buttons | Not yet covered by a test. |
 
 **Not yet explored — needs a manual walkthrough before writing tests:**
@@ -131,11 +131,17 @@ before writing the next batch of tests — don't guess at element labels.
 - [x] **Log in** with an existing account (`login.test.ts`: sign up, log
   out, then log back in with the same credentials — verifies the account
   actually persisted server-side, not just the in-session state)
-- [ ] Login with wrong password shows an error and stays on Login
-- [ ] Signup with an already-registered email shows an error
-- [ ] Signup validation: empty fields, invalid email format, weak/short
-  password — assert the appropriate inline error, not just "stays on
-  screen" (see §4 on why "stays on screen" alone is a weak assertion)
+- [x] Login with wrong password shows an error and stays on Login
+  (`login-errors.test.ts`)
+- [x] Signup with an already-registered email shows an error
+  (`signup-errors.test.ts`)
+- [x] Signup validation: empty fields, invalid email format, short
+  password (`signup-errors.test.ts`, one test per case) — asserts the
+  native "Validation" alert text, then dismisses it with OK
+- [ ] Login with an unregistered email (expect the same "Invalid email or
+  password" — worth confirming the app doesn't reveal which emails exist)
+- [ ] Login with empty fields (behavior unknown — observe by hand first)
+- [ ] Signup name field rejects digits
 
 ### P1 — Group management
 - [ ] Create a group with just the required Group Name; verify it appears
@@ -228,16 +234,38 @@ repeating the investigation:
    relative imports even in `.ts` files (e.g. `from './helpers.js'`, not
    `'./helpers'`) — `tsc --noEmit` will catch this (TS2835) if missed.
 
+7. **Tests target the staging build** (`com.navindalmia.expensemanager.staging`,
+   `bundleId` in `mobilewright.config.ts`). Its Home screen differs from
+   production: Logout is behind the ⋮ menu and the header text is
+   "Expense Groups • STAGING". When all tests fail at their first or second
+   assertion after an APK/package change, look at a screenshot of the
+   real screen before changing anything else.
+
+8. **Validation errors are native alerts, not inline text**, and an error
+   leaves the Signup form half-filled. `ensureLoggedOut` therefore also
+   recovers from a lingering Signup screen (taps the Login link), so the
+   next test's auto `startLoggedOut` doesn't fail on leftover state.
+
 ---
 
 ## 5. Suggested next steps, concretely
 
-1. Do the manual exploration in §2 (group detail, add/edit/delete expense)
-   and fill in the app map.
-2. Write `tests/login.test.ts` (P0, listed above) — it's the biggest gap
-   and reuses everything already in `tests/helpers.ts`.
-3. Write `tests/create-group.test.ts` covering the P1 group creation cases.
-4. Once expense screens are mapped, add `tests/expenses.test.ts`.
-5. Revisit `mobilewright.config.ts`'s 30s default timeout once cold-start
-   behavior (§4.4) is better understood — consider a longer timeout
-   specifically for the first test in a run, or a warm-up ping.
+Done: the P0 auth happy and error paths (`login`, `logout`, `signup`,
+`login-errors`, `signup-errors`; 8 tests, all green on the staging build).
+
+1. Finish P0: login with an unregistered email, login with empty fields,
+   signup name rejecting digits (see §3).
+2. Do the manual exploration in §2 for group detail and add/edit/delete
+   expense, screenshot each screen, and fill in the app map. Don't write
+   expense tests before this.
+3. Add `CreateGroupPage` plus a `signedInHome` fixture (sign up the fresh
+   `user` and land on Home) so non-auth tests skip the repeated signup
+   boilerplate, then write `tests/create-group.test.ts` for the P1 cases.
+4. Once expense screens are mapped, add `ExpensePage`/`GroupDetailPage`
+   and `tests/expenses.test.ts`.
+5. Consider seeding users/groups through the backend API instead of the
+   UI: signup + logout costs ~40s per test, mostly settle delays.
+6. The signup test runs at ~28s against the 30s default timeout. Raise
+   `testInfo.setTimeout` there, or the default in `mobilewright.config.ts`
+   once cold-start behavior (§4.4) is understood; a warm-up request in
+   global setup would also help.

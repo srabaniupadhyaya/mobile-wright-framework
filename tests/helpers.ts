@@ -2,6 +2,7 @@
 import type { Screen } from '@mobilewright/core';
 import { HomePage } from './pages/HomePage.js';
 import { LoginPage } from './pages/LoginPage.js';
+import { SignupPage } from './pages/SignupPage.js';
 
 function randomString(chars: string, length: number): string {
   let result = '';
@@ -25,8 +26,13 @@ const ALPHANUMERIC = `${LETTERS}0123456789`;
  */
 export async function ensureLoggedOut(screen: Screen) {
   const home = new HomePage(screen);
+  const signup = new SignupPage(screen);
   if (await home.isLoggedIn()) {
     await home.tapLogout();
+  } else if (await signup.isLoaded()) {
+    // A previous test can leave a half-filled Signup form behind (e.g. after
+    // an error); go back to Login rather than failing the next test's setup.
+    await signup.goToLogin();
   }
   await new LoginPage(screen).expectLoaded();
 }

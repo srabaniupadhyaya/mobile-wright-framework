@@ -15,6 +15,29 @@ export class SignupPage {
     await expect(this.screen.getByText('Create Account')).toBeVisible();
   }
 
+  async isLoaded() {
+    return this.screen.getByTestId('name-input').isVisible({ timeout: 2000 });
+  }
+
+  async goToLogin() {
+    await this.screen.getByLabel('Login').tap();
+  }
+
+  /** Inline error text shown on the form (e.g. duplicate email). */
+  async expectError(text: string) {
+    await expect(this.screen.getByText(text)).toBeVisible();
+  }
+
+  /** Native "Validation" alert; it blocks the screen until dismissed. */
+  async expectValidationAlert(text: string) {
+    await expect(this.screen.getByText('Validation')).toBeVisible();
+    await expect(this.screen.getByText(text)).toBeVisible();
+  }
+
+  async dismissValidationAlert() {
+    await this.screen.getByText('OK').tap();
+  }
+
   /** Fills only the fields provided; omitted fields are left empty. */
   async fillForm(fields: SignupFields) {
     if (fields.name) await this.screen.getByTestId('name-input').fill(fields.name);
